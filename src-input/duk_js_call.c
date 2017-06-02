@@ -745,7 +745,8 @@ DUK_LOCAL void duk__handle_callapply_for_call(duk_hthread *thr, duk_idx_t idx_fu
 		DUK_ASSERT(natfunc == duk_bi_function_prototype_apply);
 		goto apply_shared;
 	}
-	default: {  /* 2=Reflect.apply() */
+#if defined(DUK_USE_REFLECT_BUILTIN)
+	case 2: {  /* 2=Reflect.apply() */
 		/* Value stack:
 		 * idx_func + 0: Reflect.apply()  [already removed above]
 		 * idx_func + 1: this binding for .apply (ignored, usually Reflect)
@@ -763,6 +764,11 @@ DUK_LOCAL void duk__handle_callapply_for_call(duk_hthread *thr, duk_idx_t idx_fu
 		DUK_ASSERT(natfunc == duk_bi_reflect_apply);
 		duk_remove(ctx, idx_func);  /* remove Reflect.apply 'this' binding */
 		goto apply_shared;
+	}
+#endif  /* DUK_USE_REFLECT_BUILTIN */
+	default: {
+		DUK_ASSERT(0);
+		DUK_UNREACHABLE();
 	}
 	}
 

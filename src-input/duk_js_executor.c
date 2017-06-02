@@ -5015,6 +5015,28 @@ DUK_LOCAL DUK_NOINLINE DUK_HOT void duk__js_execute_bytecode_inner(duk_hthread *
 			break;
 		}
 
+		case DUK_OP_NEWTARGET: {
+			/* https://www.ecma-international.org/ecma-262/6.0/#sec-meta-properties-runtime-semantics-evaluation
+			 * https://www.ecma-international.org/ecma-262/6.0/#sec-getnewtarget
+			 *
+			 * No newTarget support now, so as a first approximation
+			 * use the resolved (non-bound) target function.
+			 */
+			/* FIXME: C API: push_new_target()? */
+			/* FIXME: check for function vs. eval vs. program code here? */
+			duk_activation *act;
+
+			act = thr->callstack_curr;
+			DUK_ASSERT(act != NULL);
+
+			if (act->flags & DUK_ACT_FLAG_CONSTRUCT) {
+				duk_push_tval((duk_context *) thr, &act->tv_func);
+			} else {
+				duk_push_undefined((duk_context *) thr);
+			}
+			DUK__REPLACE_TOP_BC_BREAK();
+		}
+
 #if !defined(DUK_USE_EXEC_PREFER_SIZE)
 #if !defined(DUK_USE_ES7_EXP_OPERATOR)
 		case DUK_OP_EXP_RR:
@@ -5022,7 +5044,6 @@ DUK_LOCAL DUK_NOINLINE DUK_HOT void duk__js_execute_bytecode_inner(duk_hthread *
 		case DUK_OP_EXP_RC:
 		case DUK_OP_EXP_CC:
 #endif
-		case DUK_OP_UNUSED194:
 		case DUK_OP_UNUSED195:
 		case DUK_OP_UNUSED196:
 		case DUK_OP_UNUSED197:

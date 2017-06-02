@@ -3410,6 +3410,29 @@ DUK_LOCAL void duk__expr_nud(duk_compiler_ctx *comp_ctx, duk_ivalue *res) {
 		DUK_DDD(DUK_DDDPRINT("begin parsing new expression"));
 
 		reg_target = DUK__ALLOCTEMP(comp_ctx);
+
+		if (comp_ctx->curr_token.t == DUK_TOK_PERIOD) {
+			/* new.target */
+			DUK_DDD(DUK_DDDPRINT("new.target"));
+			duk__advance(comp_ctx);
+			if (comp_ctx->curr_token.t_nores != DUK_TOK_IDENTIFIER ||
+			    !duk_hstring_equals_ascii_cstring(comp_ctx->curr_token.str1, "target")) {
+				DUK_ERROR_SYNTAX(thr, "new.target expected");
+			}
+#if 0
+			if (!comp_ctx->curr_func.is_function) {
+				/* FIXME: OK in eval code, as long as eval code is inside a function... */
+				DUK_ERROR_SYNTAX(thr, "new.target outside a function");
+			}
+#endif
+			duk__advance(comp_ctx);
+			duk__emit_bc(comp_ctx,
+			             DUK_OP_NEWTARGET,
+			             reg_target);
+			duk__ivalue_regconst(res, (duk_regconst_t) reg_target);
+			return;
+		}
+
 		duk__expr_toforcedreg(comp_ctx, res, DUK__BP_CALL /*rbp_flags*/, reg_target /*forced_reg*/);
 		DUK__SETTEMP(comp_ctx, reg_target + 1);
 
