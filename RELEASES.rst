@@ -2867,6 +2867,10 @@ Planned
 * Add duk_push_proxy() API call which allows a Proxy to be created from C
   code (GH-1500, GH-837)
 
+* Add minimal new.target support, evaluates to undefined for non-constructor
+  calls and final non-bound constructor function in constructor calls;
+  explicit newTarget not yet supported (GH-FIXME)
+
 * Add an internal type for representing Proxy instances (duk_hproxy) to
   simplify Proxy operations and improve performance (GH-1500, GH-1136)
 
